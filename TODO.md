@@ -1,0 +1,4 @@
+- add documentation
+- add functions for creating and running dialog boxes, example: func NewMsgBox(text string) (code int)
+- add code examples
+- wiki?
