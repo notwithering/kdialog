@@ -1,4 +1,4 @@
-module kdialog
+module github.com/notwithering/kdialog
 
 go 1.23.1
 
