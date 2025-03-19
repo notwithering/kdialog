@@ -14,8 +14,30 @@ import (
 
 type Button int
 type ProgressResult struct {
-	SetValue chan int
-	Quit     chan struct{}
+	obj dbus.BusObject
+}
+
+func (p *ProgressResult) SetProgress(prog int) error {
+	call := p.obj.Call("org.freedesktop.DBus.Properties.Set", 0, "org.kde.kdialog.ProgressDialog", "value", dbus.MakeVariant(prog))
+	if call.Err != nil && call.Err.Error() != "The name is not activatable" {
+		return call.Err
+	}
+	return nil
+}
+func (p *ProgressResult) Cancelled() (bool, error) {
+	var cancelled bool
+	call := p.obj.Call("org.kde.kdialog.ProgressDialog.wasCancelled", 0)
+	if call.Err != nil && call.Err.Error() != "The name is not activatable" {
+		return false, call.Err
+	}
+	err := call.Store(&cancelled)
+	if err != nil {
+		return true, nil
+	}
+	return cancelled, err
+}
+func (p *ProgressResult) Quit() error {
+	return p.obj.Call("org.kde.kdialog.ProgressDialog.close", 0).Err
 }
 
 const (
@@ -26,7 +48,7 @@ const (
 	Continue
 )
 
-func RunDialog(db DialogBox) (result any, code int) {
+func RunDialog(db DialogBox) (result any, err error) {
 	var args []string
 
 	// add list of strings to args
@@ -48,27 +70,31 @@ func RunDialog(db DialogBox) (result any, code int) {
 		}
 	}
 
-	// run kdialog with options and return exit code and stdout
-	run := func(s ...string) (int, string) {
+	// run kdialog with options and return stdout, exit code, and error
+	run := func(s ...string) (string, int, error) {
 		add(s...)
 		var stdout strings.Builder
 		cmd := exec.Command("kdialog", args...)
 		cmd.Stdout = &stdout
 
-		cmd.Run()
-
-		return cmd.ProcessState.ExitCode(), strings.TrimRight(stdout.String(), "\n")
-	}
-
-	// get the codeth index of opts if out of range it will return 0
-	get := func(code int, opts ...Button) Button {
-		if code < len(opts) && code >= 0 {
-			return opts[code]
+		err := cmd.Run()
+		_, isExitError := err.(*exec.ExitError)
+		if err != nil && !isExitError {
+			return "", 0, err
 		}
-		return 0
+
+		return strings.TrimRight(stdout.String(), "\n"), cmd.ProcessState.ExitCode(), nil
 	}
 
-	list := func() (any, int) {
+	// get the n index of opts if out of range it will return -1
+	get := func(n int, opts ...Button) Button {
+		if n < 0 || n >= len(opts) {
+			return -1
+		}
+		return opts[n]
+	}
+
+	list := func() (any, error) {
 		var tags []string
 
 		for i, item := range db.Items {
@@ -92,7 +118,10 @@ func RunDialog(db DialogBox) (result any, code int) {
 
 		fmt.Println(args)
 
-		code, msg := run("--separate-output")
+		msg, _, err := run("--separate-output")
+		if err != nil {
+			return nil, err
+		}
 
 		for _, msgTag := range strings.Split(msg, "\n") {
 			for i, tag := range tags {
@@ -102,7 +131,7 @@ func RunDialog(db DialogBox) (result any, code int) {
 			}
 		}
 
-		return checkedTags, code
+		return checkedTags, nil
 	}
 
 	flag("--ok-label", db.Ok)
@@ -117,130 +146,122 @@ func RunDialog(db DialogBox) (result any, code int) {
 
 	switch db.Form {
 	case YesNo:
-		code, _ := run("--yesno", db.Text)
-		return get(code, Yes, No), code
+		_, code, err := run("--yesno", db.Text)
+		if err != nil {
+			return nil, err
+		}
+		return get(code, Yes, No, Cancel), nil
 	case YesNoCancel:
-		code, _ := run("--yesnocancel", db.Text)
-		return get(code, Yes, No, Cancel), code
+		_, code, err := run("--yesnocancel", db.Text)
+		if err != nil {
+			return nil, err
+		}
+		return get(code, Yes, No, Cancel), nil
 	case WarningYesNo:
-		code, _ := run("--warningyesno", db.Text)
-		return get(code, Yes, No), code
+		_, code, err := run("--warningyesno", db.Text)
+		if err != nil {
+			return nil, err
+		}
+		return get(code, Yes, No), nil
 	case WarningContinueCancel:
-		code, _ := run("--warningcontinuecancel", db.Text)
-		return get(code, Continue, Cancel), code
+		_, code, err := run("--warningcontinuecancel", db.Text)
+		if err != nil {
+			return nil, err
+		}
+		return get(code, Continue, Cancel), nil
 	case WarningYesNoCancel:
-		code, _ := run("--warningyesnocancel", db.Text)
-		return get(code, Yes, No, Cancel), code
+		_, code, err := run("--warningyesnocancel", db.Text)
+		if err != nil {
+			return nil, err
+		}
+		return get(code, Yes, No, Cancel), nil
 	case Sorry:
-		code, _ := run("--sorry", db.Text)
-		return nil, code
+		_, _, err := run("--sorry", db.Text)
+		return nil, err
 	case DetailedSorry:
-		code, _ := run("--detailedsorry", db.Text, db.Details)
-		return nil, code
+		_, _, err := run("--detailedsorry", db.Text, db.Details)
+		return nil, err
 	case MsgBox:
-		code, _ := run("--msgbox", db.Text, db.Details)
-		return nil, code
+		_, _, err := run("--msgbox", db.Text, db.Details)
+		return nil, err
 	case InputBox:
-		code, msg := run("--inputbox", db.Text, db.InitialText)
-		return msg, code
+		msg, _, err := run("--inputbox", db.Text, db.InitialText)
+		return msg, err
 	case ImgBox:
-		code, _ := run("--imgbox", db.FilePath)
-		return nil, code
+		_, _, err := run("--imgbox", db.FilePath)
+		return nil, err
 	case ImgInputBox:
-		code, msg := run("--imginputbox", db.FilePath, db.Text)
-		return msg, code
+		msg, _, err := run("--imginputbox", db.FilePath, db.Text)
+		return msg, err
 	case Password:
-		code, msg := run("--password", db.Text)
-		return msg, code
+		msg, _, err := run("--password", db.Text)
+		return msg, err
 	case NewPassword:
-		code, msg := run("--newpassword", db.Text)
-		return msg, code
+		msg, _, err := run("--newpassword", db.Text)
+		return msg, err
 	case TextBox:
-		code, _ := run("--textbox", db.FilePath)
-		return nil, code
+		msg, _, err := run("--textbox", db.FilePath)
+		return msg, err
 	case TextInputBox:
-		code, msg := run("--textinputbox", db.Text, db.InitialText)
-		return msg, code
+		msg, _, err := run("--textinputbox", db.Text, db.InitialText)
+		return msg, err
 	case ComboBox:
 		add("--combobox", db.Text)
-		code, msg := run(db.Items...)
+
+		msg, _, err := run(db.Items...)
+		if err != nil {
+			return nil, err
+		}
+
 		for i, item := range db.Items {
 			if item == msg {
-				return i, code
+				return i, nil
 			}
 		}
-		return nil, code
+		return nil, nil
 	case Menu:
-		code, _ := run("--menu", db.Text)
-		return nil, code
+		// FIXME: not a no input prompt
+		_, _, err := run("--menu", db.Text)
+		return nil, err
 	case Checklist:
 		add("--checklist", db.Text)
-		list()
+		return list()
 	case Radiolist:
 		add("--radiolist", db.Text)
-		list()
+		return list()
 	case PassivePopup:
-		code, _ := run("--passivepopup", db.Text, fmt.Sprint(db.Timeout))
-		return nil, code
+		_, _, err := run("--passivepopup", db.Text, fmt.Sprint(db.Timeout))
+		return nil, err
 	case OpenFile:
-		code, msg := run("--getopenfilename", db.StartDir, db.FileFilter)
-		return msg, code
+		msg, _, err := run("--getopenfilename", db.StartDir, db.FileFilter)
+		return msg, err
 	case SaveFile:
-		code, msg := run("--getsavefilename", db.StartDir, db.FileFilter)
-		return msg, code
+		msg, _, err := run("--getsavefilename", db.StartDir, db.FileFilter)
+		return msg, err
 	case OpenExistingDirectory:
-		code, msg := run("--getexistingdirectory", db.StartDir)
-		return msg, code
+		msg, _, err := run("--getexistingdirectory", db.StartDir)
+		return msg, err
 	case OpenIcon:
-		code, msg := run("--geticon", db.Group, db.Context)
-		return msg, code
-	case Progress: // FIXME: what the fuck is this shit
-		code, msg := run("--progressbar", db.Text, fmt.Sprint(db.Maximum))
+		msg, _, err := run("--geticon", db.Group, db.Context)
+		return msg, err
+	case Progress:
+		msg, _, err := run("--progressbar", db.Text, fmt.Sprint(db.Maximum))
+		if err != nil {
+			return nil, err
+		}
 
 		conn, err := dbus.SessionBus()
 		if err != nil {
-			fmt.Println(err)
-			return nil, code
+			return nil, err
 		}
 
-		channel := make(chan int)
-		quit := make(chan struct{})
-
 		obj := conn.Object(strings.Split(msg, " ")[0], "/ProgressDialog")
-
-		go func() {
-			for {
-				select {
-				case <-quit:
-					obj.Call("org.kde.kdialog.ProgressDialog.close", 0)
-					return
-				case prog, ok := <-channel:
-					if !ok {
-						close(quit)
-						return
-					}
-
-					obj.Call("org.freedesktop.DBus.Properties.Set", 0, "org.kde.kdialog.ProgressDialog", "value", dbus.MakeVariant(prog))
-				default:
-					var wasCancelled bool
-					call := obj.Call("org.kde.kdialog.ProgressDialog.wasCancelled", 0)
-					if call.Err != nil {
-						close(quit)
-						return
-					}
-					call.Store(&wasCancelled)
-
-					if wasCancelled {
-						close(quit)
-						return
-					}
-				}
-			}
-		}()
-
-		return ProgressResult{SetValue: channel, Quit: quit}, code
+		return ProgressResult{obj: obj}, nil
 	case PickColor:
-		code, msg := run("--getcolor")
+		msg, _, err := run("--getcolor")
+		if err != nil {
+			return nil, err
+		}
 
 		var c color.RGBA
 		c.A = 0xff
@@ -250,16 +271,22 @@ func RunDialog(db DialogBox) (result any, code int) {
 		c.G *= 17
 		c.B *= 17
 
-		return c, code
+		return c, nil
 	case Slider:
-		code, msg := run("--slider", db.Text, fmt.Sprint(db.Minimum), fmt.Sprint(db.Maximum), fmt.Sprint(db.Interval))
+		msg, _, err := run("--slider", db.Text, fmt.Sprint(db.Minimum), fmt.Sprint(db.Maximum), fmt.Sprint(db.Interval))
+		if err != nil {
+			return nil, err
+		}
 		n, _ := strconv.Atoi(msg)
-		return n, code
+		return n, nil
 	case Calender:
-		code, msg := run("--calendar", db.Text, "--dateformat", "yyyy-MM-dd")
+		msg, _, err := run("--calendar", db.Text, "--dateformat", "yyyy-MM-dd")
+		if err != nil {
+			return nil, err
+		}
 		date, _ := time.Parse("2006-01-02", msg)
-		return date, code
+		return date, err
 	}
 
-	return nil, 0
+	return
 }
