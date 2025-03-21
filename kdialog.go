@@ -97,14 +97,18 @@ func RunDialog(db DialogBox) (result any, err error) {
 	// runs as a listed dialog box
 	// if multiple is true, it will return a list of selected items as a []int
 	// if multiple is false, it will return the selected item as an int
-	list := func(multiple, checks bool) (any, error) {
+	list := func(tagged, checks, multiple bool) (any, error) {
 		var tags []string
 
 		for i, item := range db.Items {
-			tag := fmt.Sprint(i)
-
-			tags = append(tags, tag)
-			add(tag, item)
+			if tagged {
+				tag := fmt.Sprint(i)
+				tags = append(tags, tag)
+				add(tag)
+			} else {
+				tags = append(tags, item)
+			}
+			add(item)
 
 			if checks {
 				if i < len(db.Checks) {
@@ -227,27 +231,16 @@ func RunDialog(db DialogBox) (result any, err error) {
 		return msg, err
 	case ComboBox:
 		add("--combobox", db.Text)
-
-		msg, _, err := run(db.Items...)
-		if err != nil {
-			return nil, err
-		}
-
-		for i, item := range db.Items {
-			if item == msg {
-				return i, nil
-			}
-		}
-		return nil, nil
+		return list(false, false, false)
 	case Menu:
 		add("--menu", db.Text)
-		return list(false, false)
+		return list(true, false, false)
 	case Checklist:
 		add("--checklist", db.Text)
-		return list(true, true)
+		return list(true, true, true)
 	case Radiolist:
 		add("--radiolist", db.Text)
-		return list(false, true)
+		return list(true, true, false)
 	case PassivePopup:
 		_, _, err := run("--passivepopup", db.Text, fmt.Sprint(db.Timeout))
 		return nil, err
