@@ -94,7 +94,10 @@ func RunDialog(db DialogBox) (result any, err error) {
 		return opts[n]
 	}
 
-	list := func() (any, error) {
+	// runs as a listed dialog box
+	// if multiple is true, it will return a list of selected items as a []int
+	// if multiple is false, it will return the selected item as an int
+	list := func(multiple, checks bool) (any, error) {
 		var tags []string
 
 		for i, item := range db.Items {
@@ -103,35 +106,52 @@ func RunDialog(db DialogBox) (result any, err error) {
 			tags = append(tags, tag)
 			add(tag, item)
 
-			if i < len(db.Checks) {
-				if db.Checks[i] {
-					add("on")
+			if checks {
+				if i < len(db.Checks) {
+					if db.Checks[i] {
+						add("on")
+					} else {
+						add("off")
+					}
 				} else {
 					add("off")
 				}
-			} else {
-				add("off")
 			}
 		}
 
-		var checkedTags []int
+		if multiple {
+			var checkedTags []int
 
-		fmt.Println(args)
+			msg, _, err := run("--separate-output")
+			if err != nil {
+				return nil, err
+			}
 
-		msg, _, err := run("--separate-output")
+			for _, msgTag := range strings.Split(msg, "\n") {
+				for i, tag := range tags {
+					if msgTag == tag {
+						checkedTags = append(checkedTags, i)
+					}
+				}
+			}
+
+			return checkedTags, nil
+		}
+
+		msg, _, err := run()
 		if err != nil {
 			return nil, err
 		}
 
-		for _, msgTag := range strings.Split(msg, "\n") {
-			for i, tag := range tags {
-				if msgTag == tag {
-					checkedTags = append(checkedTags, i)
-				}
+		msgTag := strings.TrimRight(msg, "\n")
+
+		for i, tag := range tags {
+			if msgTag == tag {
+				return i, nil
 			}
 		}
 
-		return checkedTags, nil
+		return -1, nil
 	}
 
 	flag("--ok-label", db.Ok)
@@ -220,15 +240,14 @@ func RunDialog(db DialogBox) (result any, err error) {
 		}
 		return nil, nil
 	case Menu:
-		// FIXME: not a no input prompt
-		_, _, err := run("--menu", db.Text)
-		return nil, err
+		add("--menu", db.Text)
+		return list(false, false)
 	case Checklist:
 		add("--checklist", db.Text)
-		return list()
+		return list(true, true)
 	case Radiolist:
 		add("--radiolist", db.Text)
-		return list()
+		return list(false, true)
 	case PassivePopup:
 		_, _, err := run("--passivepopup", db.Text, fmt.Sprint(db.Timeout))
 		return nil, err
