@@ -35,7 +35,7 @@ type DialogBox struct {
 	Items  []string
 	Checks []bool
 
-	DontAgain DoNotAgain
+	DontAgain DontAgain
 	Geometry  Geometry
 	Attach    string
 

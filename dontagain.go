@@ -4,12 +4,12 @@ import (
 	"fmt"
 )
 
-type DoNotAgain struct {
+type DontAgain struct {
 	File  string
 	Entry string
 }
 
-func (c *DoNotAgain) String() string {
+func (c DontAgain) String() string {
 	if c.File == "" || c.Entry == "" {
 		return ""
 	}
