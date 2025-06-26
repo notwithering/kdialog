@@ -1,5 +1,0 @@
-- add documentation
-- add functions for creating and running dialog boxes, example: func NewMsgBox(text string) (code int)
-- add code examples
-- wiki?
-- detailed form types like DetailedSorry and DetailedError are actually just Sorry and Error with an extra argument, remove detailed forms and just add DialogBox.Details as another argument for all form types. this also works with msgbox which has no detailed form type.

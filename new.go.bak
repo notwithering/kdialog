@@ -1,3 +1,7 @@
+// struggling with figuring out how to let the user
+// have full control with stuff like title and details
+// while not having a million functions for every case
+
 package kdialog
 
 func newTextButtonForm(form Form, text string, d DialogBox) (Button, error) {
@@ -53,7 +57,7 @@ func newDetailedTextForm(form Form, text, details string, d DialogBox) error {
 }
 
 func NewDetailedSorry(text, details string, d DialogBox) error {
-	return newDetailedTextForm(DetailedSorry, text, details, d)
+	return newDetailedTextForm(Sorry, text, details, d)
 }
 
 func NewError(text string, d DialogBox) error {
@@ -61,10 +65,17 @@ func NewError(text string, d DialogBox) error {
 }
 
 func NewDetailedError(text, details string, d DialogBox) error {
-	return newDetailedTextForm(DetailedError, text, details, d)
+	return newDetailedTextForm(Error, text, details, d)
 }
 
-// MsgBox
+func NewMsgBox(text string, d DialogBox) error {
+	return newTextForm(MsgBox, text, d)
+}
+
+func NewDetailedMsgBox(text, details string, d DialogBox) error {
+	return newDetailedTextForm(MsgBox, text, details, d)
+}
+
 // InputBox
 // ImgBox
 // ImgInputBox
