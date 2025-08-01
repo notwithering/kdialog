@@ -4,6 +4,15 @@ import (
 	"strings"
 )
 
+type FileFilter struct {
+	Name     string
+	Patterns []string
+}
+
+func (f FileFilter) String() string {
+	return f.Name + " (" + strings.Join(f.Patterns, " ") + ")"
+}
+
 type FileFilters []FileFilter
 
 func (f FileFilters) String() string {
@@ -17,13 +26,4 @@ func (f FileFilters) String() string {
 	}
 
 	return b.String()
-}
-
-type FileFilter struct {
-	Name     string
-	Patterns []string
-}
-
-func (f FileFilter) String() string {
-	return f.Name + " (" + strings.Join(f.Patterns, " ") + ")"
 }
