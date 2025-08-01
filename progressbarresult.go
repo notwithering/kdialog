@@ -23,6 +23,7 @@ func (p ProgressBarResult) SetProgress(prog int) error {
 
 	return nil
 }
+
 func (p ProgressBarResult) Cancelled() (bool, error) {
 	var cancelled bool
 
@@ -41,6 +42,7 @@ func (p ProgressBarResult) Cancelled() (bool, error) {
 
 	return cancelled, err
 }
+
 func (p ProgressBarResult) Quit() error {
 	err := p.obj.Call("org.kde.kdialog.ProgressDialog.close", 0).Err
 	if err != nil {
