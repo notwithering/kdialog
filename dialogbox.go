@@ -281,11 +281,10 @@ func (db DialogBox) Run() (result any, err error) {
 
 		var c color.RGBA
 		c.A = 0xff
-		fmt.Sscanf(msg, "#%1x%1x%1x", &c.R, &c.G, &c.B)
 
-		c.R *= 17
-		c.G *= 17
-		c.B *= 17
+		if _, err := fmt.Sscanf(msg, "#%02x%02x%02x", &c.R, &c.G, &c.B); err != nil {
+			return nil, err
+		}
 
 		return c, nil
 	case Slider:
