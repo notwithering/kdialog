@@ -292,15 +292,25 @@ func (db DialogBox) Run() (result any, err error) {
 		if err != nil {
 			return nil, err
 		}
-		n, _ := strconv.Atoi(msg)
+
+		n, err := strconv.Atoi(msg)
+		if err != nil {
+			return nil, err
+		}
+
 		return n, nil
 	case Calender:
 		msg, _, err := run("--calendar", db.Text, "--dateformat", "yyyy-MM-dd")
 		if err != nil {
 			return nil, err
 		}
-		date, _ := time.Parse("2006-01-02", msg)
-		return date, err
+
+		date, err := time.Parse("2006-01-02", msg)
+		if err != nil {
+			return nil, err
+		}
+
+		return date, nil
 	}
 
 	return
