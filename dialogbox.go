@@ -190,7 +190,7 @@ func (db DialogBox) Run() (result any, err error) {
 		if err != nil {
 			return nil, err
 		}
-		return get(code, Yes, No), nil
+		return get(code, Yes, No, Cancel), nil
 	case WarningContinueCancel:
 		_, code, err := run("--warningcontinuecancel", db.Text, db.Details)
 		if err != nil {
