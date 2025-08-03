@@ -29,10 +29,10 @@ func main() {
 
 	if userAnswer == answer {
 		resp.Text = "Correct!"
-		resp.Ok = "Yay!"
+		resp.OkLabel = "Yay!"
 	} else {
 		resp.Text = fmt.Sprintf("Wrong. The answer was %s.", answer)
-		resp.Ok = "Dang!"
+		resp.OkLabel = "Dang!"
 	}
 
 	resp.MustRun()

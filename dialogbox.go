@@ -43,11 +43,11 @@ type DialogBox struct {
 	Maximum  int
 	Interval int
 
-	Ok       string
-	Yes      string
-	No       string
-	Cancel   string
-	Continue string
+	OkLabel       string
+	YesLabel      string
+	NoLabel       string
+	CancelLabel   string
+	ContinueLabel string
 }
 
 func (db DialogBox) Run() (result any, err error) {
@@ -166,11 +166,11 @@ func (db DialogBox) Run() (result any, err error) {
 	flag("--dontagain", db.DontAgain)
 	flag("--geometry", db.Geometry.String())
 	flag("--attach", db.Attach)
-	flag("--ok-label", db.Ok)
-	flag("--yes-label", db.Yes)
-	flag("--no-label", db.No)
-	flag("--cancel-label", db.Cancel)
-	flag("--continue-label", db.Continue)
+	flag("--ok-label", db.OkLabel)
+	flag("--yes-label", db.YesLabel)
+	flag("--no-label", db.NoLabel)
+	flag("--cancel-label", db.CancelLabel)
+	flag("--continue-label", db.ContinueLabel)
 
 	switch db.Form {
 	case YesNo:
