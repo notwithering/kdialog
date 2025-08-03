@@ -13,6 +13,13 @@ func (f FileFilter) String() string {
 	return f.Name + " (" + strings.Join(f.Patterns, " ") + ")"
 }
 
+func NewFileFilter(name string, patterns ...string) FileFilter {
+	return FileFilter{
+		Name:     name,
+		Patterns: patterns,
+	}
+}
+
 type FileFilters []FileFilter
 
 func (f FileFilters) String() string {
@@ -26,4 +33,8 @@ func (f FileFilters) String() string {
 	}
 
 	return b.String()
+}
+
+func NewFileFilters(filters ...FileFilter) FileFilters {
+	return FileFilters(filters)
 }

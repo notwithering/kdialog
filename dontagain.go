@@ -16,3 +16,10 @@ func (c DontAgain) String() string {
 
 	return fmt.Sprintf("%s:%s", c.File, c.Entry)
 }
+
+func NewDontAgain(file, entry string) DontAgain {
+	return DontAgain{
+		File:  file,
+		Entry: entry,
+	}
+}
