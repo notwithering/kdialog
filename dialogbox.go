@@ -279,6 +279,10 @@ func (db DialogBox) Run() (result any, err error) {
 			return nil, err
 		}
 
+		if msg == "" {
+			return Cancel, nil
+		}
+
 		var c color.RGBA
 		c.A = 0xff
 
@@ -293,6 +297,10 @@ func (db DialogBox) Run() (result any, err error) {
 			return nil, err
 		}
 
+		if msg == "" {
+			return Cancel, nil
+		}
+
 		n, err := strconv.Atoi(msg)
 		if err != nil {
 			return nil, err
@@ -303,6 +311,10 @@ func (db DialogBox) Run() (result any, err error) {
 		msg, _, err := run("--calendar", db.Text, "--dateformat", "yyyy-MM-dd")
 		if err != nil {
 			return nil, err
+		}
+
+		if msg == "" {
+			return Cancel, nil
 		}
 
 		date, err := time.Parse("2006-01-02", msg)
