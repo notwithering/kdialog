@@ -3,7 +3,8 @@ package kdialog
 type Button int8
 
 const (
-	Ok Button = iota
+	Undefined Button = iota - 1
+	Ok
 	Yes
 	No
 	Cancel

@@ -53,28 +53,30 @@ type DialogBox struct {
 func (db DialogBox) Run() (result any, err error) {
 	var args []string
 
-	// add list of strings to args
-	add := func(s ...string) {
-		args = append(args, s...)
+	// appends a list of values to args
+	appendArgs := func(a ...any) {
+		for _, v := range a {
+			args = append(args, fmt.Sprint(v))
+		}
 	}
 
 	// add a, b to args if b is not empty or true
-	flag := func(a string, b any) {
+	addFlagIf := func(a string, b any) {
 		switch v := b.(type) {
 		case string:
 			if v != "" {
-				add(a, v)
+				appendArgs(a, v)
 			}
 		case bool:
 			if v {
-				add(a)
+				appendArgs(a)
 			}
 		}
 	}
 
 	// run kdialog with options and return stdout, exit code, and error
-	run := func(s ...string) (string, int, error) {
-		add(s...)
+	runDialog := func(a ...any) (string, int, error) {
+		appendArgs(a...)
 		var stdout strings.Builder
 		cmd := exec.Command("kdialog", args...)
 		cmd.Stdout = &stdout
@@ -88,39 +90,39 @@ func (db DialogBox) Run() (result any, err error) {
 		return strings.TrimRight(stdout.String(), "\n"), cmd.ProcessState.ExitCode(), nil
 	}
 
-	// get the n index of opts if out of range it will return -1
-	get := func(n int, opts ...Button) Button {
+	// get the n index of opts if out of range it will return Undefined
+	getButton := func(n int, opts ...Button) Button {
 		if n < 0 || n >= len(opts) {
-			return -1
+			return Undefined
 		}
 		return opts[n]
 	}
 
 	// runs as a listed dialog box
-	// if multiple is true, it will return a list of selected items as a []int
+	// if multiple is true, it will return a runListDialog of selected items as a []int
 	// if multiple is false, it will return the selected item as an int
-	list := func(tagged, checks, multiple bool) (any, error) {
+	runListDialog := func(tagged, checks, multiple bool) (any, error) {
 		var tags []string
 
 		for i, item := range db.Items {
 			if tagged {
 				tag := fmt.Sprint(i)
 				tags = append(tags, tag)
-				add(tag)
+				appendArgs(tag)
 			} else {
 				tags = append(tags, item)
 			}
-			add(item)
+			appendArgs(item)
 
 			if checks {
 				if i < len(db.Checks) {
 					if db.Checks[i] {
-						add("on")
+						appendArgs("on")
 					} else {
-						add("off")
+						appendArgs("off")
 					}
 				} else {
-					add("off")
+					appendArgs("off")
 				}
 			}
 		}
@@ -128,7 +130,7 @@ func (db DialogBox) Run() (result any, err error) {
 		if multiple {
 			var checkedTags []int
 
-			msg, _, err := run("--separate-output")
+			msg, _, err := runDialog("--separate-output")
 			if err != nil {
 				return nil, err
 			}
@@ -144,7 +146,7 @@ func (db DialogBox) Run() (result any, err error) {
 			return checkedTags, nil
 		}
 
-		msg, _, err := run()
+		msg, _, err := runDialog()
 		if err != nil {
 			return nil, err
 		}
@@ -160,108 +162,120 @@ func (db DialogBox) Run() (result any, err error) {
 		return -1, nil
 	}
 
-	flag("--title", db.Title)
-	flag("--default", db.Default)
-	flag("--multiple", db.Multiple)
-	flag("--dontagain", db.DontAgain)
-	flag("--geometry", db.Geometry.String())
-	flag("--attach", db.Attach)
-	flag("--ok-label", db.OkLabel)
-	flag("--yes-label", db.YesLabel)
-	flag("--no-label", db.NoLabel)
-	flag("--cancel-label", db.CancelLabel)
-	flag("--continue-label", db.ContinueLabel)
+	addFlagIf("--title", db.Title)
+	addFlagIf("--default", db.Default)
+	addFlagIf("--multiple", db.Multiple)
+	addFlagIf("--dontagain", db.DontAgain)
+	addFlagIf("--geometry", db.Geometry.String())
+	addFlagIf("--attach", db.Attach)
+	addFlagIf("--ok-label", db.OkLabel)
+	addFlagIf("--yes-label", db.YesLabel)
+	addFlagIf("--no-label", db.NoLabel)
+	addFlagIf("--cancel-label", db.CancelLabel)
+	addFlagIf("--continue-label", db.ContinueLabel)
 
 	switch db.Form {
 	case YesNo:
-		_, code, err := run("--yesno", db.Text, db.Details)
+		_, code, err := runDialog("--yesno", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
-		return get(code, Yes, No, Cancel), nil
+		return getButton(code, Yes, No, Cancel), nil
 	case YesNoCancel:
-		_, code, err := run("--yesnocancel", db.Text, db.Details)
+		_, code, err := runDialog("--yesnocancel", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
-		return get(code, Yes, No, Cancel), nil
+		return getButton(code, Yes, No, Cancel), nil
 	case WarningYesNo:
-		_, code, err := run("--warningyesno", db.Text, db.Details)
+		_, code, err := runDialog("--warningyesno", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
-		return get(code, Yes, No, Cancel), nil
+		return getButton(code, Yes, No, Cancel), nil
 	case WarningContinueCancel:
-		_, code, err := run("--warningcontinuecancel", db.Text, db.Details)
+		_, code, err := runDialog("--warningcontinuecancel", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
-		return get(code, Continue, Cancel), nil
+		return getButton(code, Continue, Cancel), nil
 	case WarningYesNoCancel:
-		_, code, err := run("--warningyesnocancel", db.Text, db.Details)
+		_, code, err := runDialog("--warningyesnocancel", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
-		return get(code, Yes, No, Cancel), nil
+		return getButton(code, Yes, No, Cancel), nil
 	case Sorry:
-		_, _, err := run("--sorry", db.Text, db.Details)
+		_, _, err := runDialog("--sorry", db.Text, db.Details)
 		return nil, err
 	case Error:
-		_, _, err := run("--error", db.Text, db.Details)
+		_, _, err := runDialog("--error", db.Text, db.Details)
 		return nil, err
 	case MsgBox:
-		_, _, err := run("--msgbox", db.Text, db.Details)
+		_, _, err := runDialog("--msgbox", db.Text, db.Details)
 		return nil, err
 	case InputBox:
-		msg, _, err := run("--inputbox", db.Text, db.InitialText)
+		msg, _, err := runDialog("--inputbox", db.Text, db.InitialText)
 		return msg, err
 	case ImgBox:
-		_, _, err := run("--imgbox", db.FilePath)
+		_, _, err := runDialog("--imgbox", db.FilePath)
 		return nil, err
 	case ImgInputBox:
-		msg, _, err := run("--imginputbox", db.FilePath, db.Text)
+		msg, _, err := runDialog("--imginputbox", db.FilePath, db.Text)
 		return msg, err
 	case Password:
-		msg, _, err := run("--password", db.Text)
+		msg, _, err := runDialog("--password", db.Text)
 		return msg, err
 	case NewPassword:
-		msg, _, err := run("--newpassword", db.Text)
+		msg, _, err := runDialog("--newpassword", db.Text)
 		return msg, err
 	case TextBox:
-		msg, _, err := run("--textbox", db.FilePath)
+		msg, _, err := runDialog("--textbox", db.FilePath)
 		return msg, err
 	case TextInputBox:
-		msg, _, err := run("--textinputbox", db.Text, db.InitialText)
+		msg, _, err := runDialog("--textinputbox", db.Text, db.InitialText)
 		return msg, err
 	case ComboBox:
-		add("--combobox", db.Text)
-		return list(false, false, false)
+		appendArgs("--combobox", db.Text)
+		tagged := false
+		checks := false
+		multiple := false
+		return runListDialog(tagged, checks, multiple)
 	case Menu:
-		add("--menu", db.Text)
-		return list(true, false, false)
+		appendArgs("--menu", db.Text)
+		tagged := true
+		checks := false
+		multiple := false
+		return runListDialog(tagged, checks, multiple)
 	case Checklist:
-		add("--checklist", db.Text)
-		return list(true, true, true)
+		appendArgs("--checklist", db.Text)
+		tagged := true
+		checks := true
+		multiple := true
+		return runListDialog(tagged, checks, multiple)
 	case Radiolist:
-		add("--radiolist", db.Text)
-		return list(true, true, false)
+		appendArgs("--radiolist", db.Text)
+		tagged := true
+		checks := true
+		multiple := false
+		return runListDialog(tagged, checks, multiple)
 	case PassivePopup:
-		_, _, err := run("--passivepopup", db.Text, fmt.Sprint(db.Timeout))
+		_, _, err := runDialog("--passivepopup", db.Text, db.Timeout)
 		return nil, err
 	case OpenFile:
-		msg, _, err := run("--getopenfilename", db.StartDir, db.FileFilters.String())
+		msg, _, err := runDialog("--getopenfilename", db.StartDir, db.FileFilters.String())
 		return msg, err
 	case SaveFile:
-		msg, _, err := run("--getsavefilename", db.StartDir, db.FileFilters.String())
+		msg, _, err := runDialog("--getsavefilename", db.StartDir, db.FileFilters.String())
 		return msg, err
 	case OpenExistingDirectory:
-		msg, _, err := run("--getexistingdirectory", db.StartDir)
+		msg, _, err := runDialog("--getexistingdirectory", db.StartDir)
 		return msg, err
 	case OpenIcon:
-		msg, _, err := run("--geticon", db.Group, db.Context)
+		msg, _, err := runDialog("--geticon", db.Group, db.Context)
 		return msg, err
 	case ProgressBar:
-		msg, _, err := run("--progressbar", db.Text, fmt.Sprint(db.Maximum))
+		msg, _, err := runDialog("--progressbar", db.Text, db.Maximum)
 		if err != nil {
 			return nil, err
 		}
@@ -272,9 +286,9 @@ func (db DialogBox) Run() (result any, err error) {
 		}
 
 		obj := conn.Object(strings.Split(msg, " ")[0], "/ProgressDialog")
-		return ProgressBarResult{obj: obj}, nil
+		return &ProgressBarResult{obj: obj}, nil
 	case PickColor:
-		msg, _, err := run("--getcolor")
+		msg, _, err := runDialog("--getcolor")
 		if err != nil {
 			return nil, err
 		}
@@ -292,7 +306,7 @@ func (db DialogBox) Run() (result any, err error) {
 
 		return c, nil
 	case Slider:
-		msg, _, err := run("--slider", db.Text, fmt.Sprint(db.Minimum), fmt.Sprint(db.Maximum), fmt.Sprint(db.Interval))
+		msg, _, err := runDialog("--slider", db.Text, db.Minimum, db.Maximum, db.Interval)
 		if err != nil {
 			return nil, err
 		}
@@ -308,7 +322,7 @@ func (db DialogBox) Run() (result any, err error) {
 
 		return n, nil
 	case Calender:
-		msg, _, err := run("--calendar", db.Text, "--dateformat", "yyyy-MM-dd")
+		msg, _, err := runDialog("--calendar", db.Text, "--dateformat", "yyyy-MM-dd")
 		if err != nil {
 			return nil, err
 		}
