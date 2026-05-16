@@ -2,7 +2,7 @@
 
 kdialog is a go wrapper around the kdialog kde dialog utility
 
-![image](https://github.com/user-attachments/assets/fc03c7eb-ec33-434a-b992-a3e89584c842)
+![image](https://github.com/user-attachments/assets/ed8ac1ef-14dd-41e5-8694-916fab1bea1f)
 
 ## features
 
