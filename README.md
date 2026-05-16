@@ -14,5 +14,5 @@ kdialog is a go wrapper around the kdialog kde dialog utility
 ## get
 
 ```bash
-go get github.com/notwithering/kdialog@latest
+go get github.com/notwithering/kdialog
 ```
