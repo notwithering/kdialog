@@ -3,35 +3,18 @@
 ## table of contents
 
 - [error](error/main.go)
-	- kdialog.DialogBox
-	- kdialog.FormError
-	- kdialog.DialogBox.MustRun
+	- FormError
 - [filepicker](filepicker/main.go)
-	- kdialog.DialogBox
-	- kdialog.FormOpenFile
-	- kdialog.FileFilters
-	- kdialog.DialogBox.Run
+	- FormOpenFile
+	- FileFilters
 - [loveletter](loveletter/main.go)
-	- kdialog.DialogBox
-	- kdialog.FormYesNo
-	- kdialog.DialogBox.MustRun
-	- kdialog.Button
-	- kdialog.ButtonYes
-	- kdialog.ButtonNo
-	- kdialog.FormMsgBox
+	- FormYesNo
+	- FormMsgBox
 - [mathquiz](mathquiz/main.go)
-	- kdialog.DialogBox
-	- kdialog.FormInputBox.MustRun
-	- kdialog.FormMsgBox
+	- FormMsgBox
 - [progressbar](progressbar/main.go)
-	- kdialog.DialogBox
-	- kdialog.DialogBox.MustRun
-	- kdialog.FormProgressBar
-	- kdialog.ProgressBar
-	- kdialog.ProgressBar.Cancelled
-	- kdialog.ProgressBar.SetProgress
-	- kdialog.ProgressBar.Quit
+	- FormProgressBar
+	- ProgressBar
 - [zodiacsign](zodiacsign/main.go)
-	- kdialog.DialogBox
-	- kdialog.FormCalendar
-	- kdialog.kdialog.FormMsgBox
+	- FormCalendar
+	- FormMsgBox
