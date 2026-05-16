@@ -20,7 +20,7 @@ func main() {
 	case kdialog.ButtonNo:
 		d.Text = "I don't love you!"
 	default:
-		// most likely kdialog.Cancel which can be done with a YesNo dialog by just closing the window
+		// most likely kdialog.ButtonCancel which can be done with a FormYesNo dialog by just closing the window
 		return
 	}
 
