@@ -321,7 +321,7 @@ func (db DialogBox) Run() (result any, err error) {
 		}
 
 		return n, nil
-	case FormCalender:
+	case FormCalendar:
 		msg, _, err := runDialog("--calendar", db.Text, "--dateformat", "yyyy-MM-dd")
 		if err != nil {
 			return nil, err

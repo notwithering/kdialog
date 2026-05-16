@@ -30,5 +30,5 @@ const (
 	FormProgressBar
 	FormPickColor
 	FormSlider
-	FormCalender
+	FormCalendar
 )
