@@ -8,11 +8,11 @@ kdialog is a go wrapper around the kdialog kde dialog utility
 
 - supports all dialog types like yes/no, input box, file picker, etc.
 - very structured
-- has a many convenience functions and types
+- has many convenience functions and types
 - can do everything the kdialog command can do
 
 ## get
 
 ```bash
-go get github.com/notwithering/kdialog
+go get github.com/notwithering/kdialog@latest
 ```
