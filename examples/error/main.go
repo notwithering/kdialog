@@ -10,7 +10,7 @@ func main() {
 	_, err := strconv.Atoi("hello")
 
 	kdialog.DialogBox{
-		Form:    kdialog.Error,
+		Form:    kdialog.FormError,
 		Text:    "An error occured.",
 		Details: err.Error(),
 	}.MustRun()

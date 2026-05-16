@@ -15,7 +15,7 @@ func main() {
 
 	d := kdialog.DialogBox{
 		Title: "Math Quiz",
-		Form:  kdialog.InputBox,
+		Form:  kdialog.FormInputBox,
 		Text:  fmt.Sprintf("What is %d + %d?", a, b),
 	}
 
@@ -24,7 +24,7 @@ func main() {
 
 	resp := kdialog.DialogBox{
 		Title: "Result",
-		Form:  kdialog.MsgBox,
+		Form:  kdialog.FormMsgBox,
 	}
 
 	if userAnswer == answer {

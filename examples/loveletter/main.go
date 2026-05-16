@@ -7,7 +7,7 @@ import (
 func main() {
 	d := kdialog.DialogBox{
 		Title: "Love Letter",
-		Form:  kdialog.YesNo,
+		Form:  kdialog.FormYesNo,
 		Text:  "Do you love me?",
 	}
 
@@ -25,6 +25,6 @@ func main() {
 	}
 
 	// reuse the dialog box
-	d.Form = kdialog.MsgBox
+	d.Form = kdialog.FormMsgBox
 	d.MustRun()
 }

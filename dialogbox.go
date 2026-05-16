@@ -175,106 +175,106 @@ func (db DialogBox) Run() (result any, err error) {
 	addFlagIf("--continue-label", db.ContinueLabel)
 
 	switch db.Form {
-	case YesNo:
+	case FormYesNo:
 		_, code, err := runDialog("--yesno", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
 		return getButton(code, Yes, No, Cancel), nil
-	case YesNoCancel:
+	case FormYesNoCancel:
 		_, code, err := runDialog("--yesnocancel", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
 		return getButton(code, Yes, No, Cancel), nil
-	case WarningYesNo:
+	case FormWarningYesNo:
 		_, code, err := runDialog("--warningyesno", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
 		return getButton(code, Yes, No, Cancel), nil
-	case WarningContinueCancel:
+	case FormWarningContinueCancel:
 		_, code, err := runDialog("--warningcontinuecancel", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
 		return getButton(code, Continue, Cancel), nil
-	case WarningYesNoCancel:
+	case FormWarningYesNoCancel:
 		_, code, err := runDialog("--warningyesnocancel", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
 		return getButton(code, Yes, No, Cancel), nil
-	case Sorry:
+	case FormSorry:
 		_, _, err := runDialog("--sorry", db.Text, db.Details)
 		return nil, err
-	case Error:
+	case FormError:
 		_, _, err := runDialog("--error", db.Text, db.Details)
 		return nil, err
-	case MsgBox:
+	case FormMsgBox:
 		_, _, err := runDialog("--msgbox", db.Text, db.Details)
 		return nil, err
-	case InputBox:
+	case FormInputBox:
 		msg, _, err := runDialog("--inputbox", db.Text, db.InitialText)
 		return msg, err
-	case ImgBox:
+	case FormImgBox:
 		_, _, err := runDialog("--imgbox", db.FilePath)
 		return nil, err
-	case ImgInputBox:
+	case FormImgInputBox:
 		msg, _, err := runDialog("--imginputbox", db.FilePath, db.Text)
 		return msg, err
-	case Password:
+	case FormPassword:
 		msg, _, err := runDialog("--password", db.Text)
 		return msg, err
-	case NewPassword:
+	case FormNewPassword:
 		msg, _, err := runDialog("--newpassword", db.Text)
 		return msg, err
-	case TextBox:
+	case FormTextBox:
 		msg, _, err := runDialog("--textbox", db.FilePath)
 		return msg, err
-	case TextInputBox:
+	case FormTextInputBox:
 		msg, _, err := runDialog("--textinputbox", db.Text, db.InitialText)
 		return msg, err
-	case ComboBox:
+	case FormComboBox:
 		appendArgs("--combobox", db.Text)
 		tagged := false
 		checks := false
 		multiple := false
 		return runListDialog(tagged, checks, multiple)
-	case Menu:
+	case FormMenu:
 		appendArgs("--menu", db.Text)
 		tagged := true
 		checks := false
 		multiple := false
 		return runListDialog(tagged, checks, multiple)
-	case Checklist:
+	case FormChecklist:
 		appendArgs("--checklist", db.Text)
 		tagged := true
 		checks := true
 		multiple := true
 		return runListDialog(tagged, checks, multiple)
-	case Radiolist:
+	case FormRadiolist:
 		appendArgs("--radiolist", db.Text)
 		tagged := true
 		checks := true
 		multiple := false
 		return runListDialog(tagged, checks, multiple)
-	case PassivePopup:
+	case FormPassivePopup:
 		_, _, err := runDialog("--passivepopup", db.Text, db.Timeout)
 		return nil, err
-	case OpenFile:
+	case FormOpenFile:
 		msg, _, err := runDialog("--getopenfilename", db.StartDir, db.FileFilters.String())
 		return msg, err
-	case SaveFile:
+	case FormSaveFile:
 		msg, _, err := runDialog("--getsavefilename", db.StartDir, db.FileFilters.String())
 		return msg, err
-	case OpenExistingDirectory:
+	case FormOpenExistingDirectory:
 		msg, _, err := runDialog("--getexistingdirectory", db.StartDir)
 		return msg, err
-	case OpenIcon:
+	case FormOpenIcon:
 		msg, _, err := runDialog("--geticon", db.Group, db.Context)
 		return msg, err
-	case ProgressBar:
+	case FormProgressBar:
 		msg, _, err := runDialog("--progressbar", db.Text, db.Maximum)
 		if err != nil {
 			return nil, err
@@ -286,8 +286,8 @@ func (db DialogBox) Run() (result any, err error) {
 		}
 
 		obj := conn.Object(strings.Split(msg, " ")[0], "/ProgressDialog")
-		return &ProgressBarResult{obj: obj}, nil
-	case PickColor:
+		return &ProgressBar{obj: obj}, nil
+	case FormPickColor:
 		msg, _, err := runDialog("--getcolor")
 		if err != nil {
 			return nil, err
@@ -305,7 +305,7 @@ func (db DialogBox) Run() (result any, err error) {
 		}
 
 		return c, nil
-	case Slider:
+	case FormSlider:
 		msg, _, err := runDialog("--slider", db.Text, db.Minimum, db.Maximum, db.Interval)
 		if err != nil {
 			return nil, err
@@ -321,7 +321,7 @@ func (db DialogBox) Run() (result any, err error) {
 		}
 
 		return n, nil
-	case Calender:
+	case FormCalender:
 		msg, _, err := runDialog("--calendar", db.Text, "--dateformat", "yyyy-MM-dd")
 		if err != nil {
 			return nil, err

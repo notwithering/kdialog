@@ -8,12 +8,12 @@ import (
 
 func main() {
 	db := kdialog.DialogBox{
-		Form:    kdialog.ProgressBar,
+		Form:    kdialog.FormProgressBar,
 		Text:    "Loading...",
 		Minimum: 0,
 		Maximum: 1000,
 	}
-	bar := db.MustRun().(*kdialog.ProgressBarResult)
+	bar := db.MustRun().(*kdialog.ProgressBar)
 
 	for i := range db.Maximum + 1 {
 		if c, _ := bar.Cancelled(); c {

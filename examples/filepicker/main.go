@@ -9,7 +9,7 @@ import (
 func main() {
 	d := kdialog.DialogBox{
 		Title: "Open File",
-		Form:  kdialog.OpenFile,
+		Form:  kdialog.FormOpenFile,
 		FileFilters: kdialog.FileFilters{
 			{Name: "Images", Patterns: []string{"*.png", "*.jpg", "*.jpeg"}},
 			{Name: "Text Files", Patterns: []string{"*.txt", "*.md"}},
