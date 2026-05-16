@@ -93,7 +93,7 @@ func (db DialogBox) Run() (result any, err error) {
 	// get the n index of opts if out of range it will return Undefined
 	getButton := func(n int, opts ...Button) Button {
 		if n < 0 || n >= len(opts) {
-			return Undefined
+			return ButtonUndefined
 		}
 		return opts[n]
 	}
@@ -180,31 +180,31 @@ func (db DialogBox) Run() (result any, err error) {
 		if err != nil {
 			return nil, err
 		}
-		return getButton(code, Yes, No, Cancel), nil
+		return getButton(code, ButtonYes, ButtonNo, ButtonCancel), nil
 	case FormYesNoCancel:
 		_, code, err := runDialog("--yesnocancel", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
-		return getButton(code, Yes, No, Cancel), nil
+		return getButton(code, ButtonYes, ButtonNo, ButtonCancel), nil
 	case FormWarningYesNo:
 		_, code, err := runDialog("--warningyesno", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
-		return getButton(code, Yes, No, Cancel), nil
+		return getButton(code, ButtonYes, ButtonNo, ButtonCancel), nil
 	case FormWarningContinueCancel:
 		_, code, err := runDialog("--warningcontinuecancel", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
-		return getButton(code, Continue, Cancel), nil
+		return getButton(code, ButtonContinue, ButtonCancel), nil
 	case FormWarningYesNoCancel:
 		_, code, err := runDialog("--warningyesnocancel", db.Text, db.Details)
 		if err != nil {
 			return nil, err
 		}
-		return getButton(code, Yes, No, Cancel), nil
+		return getButton(code, ButtonYes, ButtonNo, ButtonCancel), nil
 	case FormSorry:
 		_, _, err := runDialog("--sorry", db.Text, db.Details)
 		return nil, err
@@ -294,7 +294,7 @@ func (db DialogBox) Run() (result any, err error) {
 		}
 
 		if msg == "" {
-			return Cancel, nil
+			return ButtonCancel, nil
 		}
 
 		var c color.RGBA
@@ -312,7 +312,7 @@ func (db DialogBox) Run() (result any, err error) {
 		}
 
 		if msg == "" {
-			return Cancel, nil
+			return ButtonCancel, nil
 		}
 
 		n, err := strconv.Atoi(msg)
@@ -328,7 +328,7 @@ func (db DialogBox) Run() (result any, err error) {
 		}
 
 		if msg == "" {
-			return Cancel, nil
+			return ButtonCancel, nil
 		}
 
 		date, err := time.Parse("2006-01-02", msg)

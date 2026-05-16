@@ -15,9 +15,9 @@ func main() {
 	r := result.(kdialog.Button) // assert the type to a button
 
 	switch r {
-	case kdialog.Yes:
+	case kdialog.ButtonYes:
 		d.Text = "I love you too!"
-	case kdialog.No:
+	case kdialog.ButtonNo:
 		d.Text = "I don't love you!"
 	default:
 		// most likely kdialog.Cancel which can be done with a YesNo dialog by just closing the window

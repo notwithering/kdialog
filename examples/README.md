@@ -16,8 +16,8 @@
 	- kdialog.FormYesNo
 	- kdialog.DialogBox.MustRun
 	- kdialog.Button
-	- kdialog.Yes
-	- kdialog.No
+	- kdialog.ButtonYes
+	- kdialog.ButtonNo
 	- kdialog.FormMsgBox
 - [mathquiz](mathquiz/main.go)
 	- kdialog.DialogBox
